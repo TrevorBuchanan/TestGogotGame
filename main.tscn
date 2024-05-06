@@ -1,0 +1,53 @@
+[gd_scene load_steps=11 format=3 uid="uid://b1sp1tgwxciqt"]
+
+[ext_resource type="Script" path="res://Ground.gd" id="1_ylv0a"]
+[ext_resource type="Shader" path="res://Land.gdshader" id="2_4ocul"]
+[ext_resource type="Script" path="res://GroundMeshGenerator.gd" id="2_nhmmj"]
+
+[sub_resource type="HeightMapShape3D" id="HeightMapShape3D_cvmi5"]
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_5sj27"]
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_2ngtj"]
+noise = SubResource("FastNoiseLite_5sj27")
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_woi1a"]
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_hir26"]
+as_normal_map = true
+noise = SubResource("FastNoiseLite_woi1a")
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_dx73t"]
+render_priority = 0
+shader = ExtResource("2_4ocul")
+shader_parameter/height_scale = 0.5
+shader_parameter/noise = SubResource("NoiseTexture2D_2ngtj")
+shader_parameter/normalmap = SubResource("NoiseTexture2D_hir26")
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_83j3a"]
+material = SubResource("ShaderMaterial_dx73t")
+subdivide_width = 32
+subdivide_depth = 32
+
+[node name="Main" type="Node"]
+
+[node name="CameraPivot" type="Marker3D" parent="."]
+transform = Transform3D(1, -5.7623e-16, 2.64427e-16, 2.64427e-16, 0.758134, 0.652098, -5.7623e-16, -0.652098, 0.758134, -0.0093019, 8.11752, -0.00678563)
+
+[node name="Camera3D" type="Camera3D" parent="CameraPivot"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.696562, 1.69777)
+
+[node name="Ground" type="StaticBody3D" parent="."]
+transform = Transform3D(16, 0, 0, 0, 16, 0, 0, 0, 16, 0, 0, 0)
+script = ExtResource("1_ylv0a")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Ground"]
+shape = SubResource("HeightMapShape3D_cvmi5")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Ground"]
+mesh = SubResource("PlaneMesh_83j3a")
+script = ExtResource("2_nhmmj")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(1, -0.000262869, -0.000646752, 0.000698132, 0.376531, 0.926404, 0, -0.926404, 0.376532, 0, 202.498, 117.815)
+shadow_enabled = true
