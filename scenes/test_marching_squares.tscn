@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://c0anjecciyo2u"]
+
+[ext_resource type="Script" path="res://scripts/test_marching_squares.gd" id="1_p2fbi"]
+
+[node name="TestMarchingSquares" type="Node2D"]
+script = ExtResource("1_p2fbi")

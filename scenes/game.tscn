@@ -1,0 +1,50 @@
+[gd_scene load_steps=10 format=3 uid="uid://dsa0gfs1848c2"]
+
+[ext_resource type="Script" path="res://scripts/game.gd" id="1_4ea85"]
+[ext_resource type="PackedScene" uid="uid://j7am5himixrv" path="res://scenes/player.tscn" id="1_8qnc7"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_dm21j"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_qvdjm"]
+
+[sub_resource type="MeshTexture" id="MeshTexture_1cvy2"]
+
+[sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_oiqy4"]
+panorama = SubResource("MeshTexture_1cvy2")
+
+[sub_resource type="Sky" id="Sky_a7b2r"]
+sky_material = SubResource("PanoramaSkyMaterial_oiqy4")
+
+[sub_resource type="Environment" id="Environment_acdms"]
+background_mode = 2
+sky = SubResource("Sky_a7b2r")
+ambient_light_source = 3
+ambient_light_color = Color(0, 0.498839, 0.754723, 1)
+fog_enabled = true
+fog_light_color = Color(0, 0.568917, 0.93277, 1)
+
+[sub_resource type="CameraAttributesPractical" id="CameraAttributesPractical_8xiej"]
+
+[node name="Game" type="Node"]
+script = ExtResource("1_4ea85")
+
+[node name="Sun" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.795473, 0.189271, -0.575672, 3.31338e-16, 0.949972, 0.312335, 0.605988, -0.248454, 0.755678, -0.843534, 14.5842, 2.85302)
+shadow_enabled = true
+
+[node name="Player" parent="." instance=ExtResource("1_8qnc7")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.08165e-12, 3, -4)
+
+[node name="TempGround" type="StaticBody3D" parent="."]
+transform = Transform3D(50, 0, 0, 0, 1, 0, 0, 0, 50, 0, 0, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="TempGround"]
+shape = SubResource("BoxShape3D_dm21j")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="TempGround"]
+mesh = SubResource("BoxMesh_qvdjm")
+skeleton = NodePath("../CollisionShape3D")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_acdms")
+camera_attributes = SubResource("CameraAttributesPractical_8xiej")
