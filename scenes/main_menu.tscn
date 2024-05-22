@@ -80,7 +80,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 theme = SubResource("Theme_qsvwq")
-color = Color(0.069381, 5.6464e-05, 0.23117, 1)
+color = Color(0.0710472, 0.186291, 0.288893, 1)
 
 [node name="VBoxContainer" type="VBoxContainer" parent="."]
 layout_mode = 1
