@@ -93,14 +93,20 @@ func draw_marching_squares():
 		while j < height:
 			i = 0
 			while i < width:
-				if (noise.noise.get_noise_2d(i, j) + 1.0) / 2.0 > isolevel: 
+				var pt_1_val = (noise.noise.get_noise_2d(i, j) + 1.0) / 2.0
+				var pt_2_val = (noise.noise.get_noise_2d(i + grid_size, j) + 1.0) / 2.0
+				var pt_3_val = (noise.noise.get_noise_2d(i + grid_size, j + grid_size) + 1.0) / 2.0
+				var pt_4_val = (noise.noise.get_noise_2d(i, j + grid_size) + 1.0) / 2.0
+				
+				if pt_1_val > isolevel: 
 					square_index |= 0b0001
-				if (noise.noise.get_noise_2d(i + grid_size, j) + 1.0) / 2.0 > isolevel: 
+				if pt_2_val > isolevel:
 					square_index |= 0b0010
-				if (noise.noise.get_noise_2d(i + grid_size, j + grid_size) + 1.0) / 2.0 > isolevel: 
+				if pt_3_val > isolevel: 
 					square_index |= 0b0100
-				if (noise.noise.get_noise_2d(i, j + grid_size) + 1.0) / 2.0 > isolevel: 
+				if pt_4_val > isolevel: 
 					square_index |= 0b1000
+				
 				var tris = triTable[square_index]
 				var k = 0
 				while k < len(tris): # Draw a triangle
