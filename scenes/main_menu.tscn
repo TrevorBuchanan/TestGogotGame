@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=3 uid="uid://t3fl71hfc5fw"]
+[gd_scene load_steps=4 format=3 uid="uid://t3fl71hfc5fw"]
 
 [ext_resource type="Script" path="res://main_menu.gd" id="1_c7ww7"]
 
@@ -8,60 +8,6 @@ subpixel_positioning = 0
 [sub_resource type="Theme" id="Theme_qsvwq"]
 default_font = SubResource("SystemFont_48f7v")
 default_font_size = 24
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_efiv8"]
-content_margin_left = 20.0
-content_margin_top = 20.0
-content_margin_right = 20.0
-content_margin_bottom = 20.0
-bg_color = Color(0.387006, 0.10066, 0.15479, 1)
-border_width_left = 3
-border_width_top = 3
-border_width_right = 3
-border_width_bottom = 3
-border_color = Color(0.992157, 0.878431, 0.831373, 0.654902)
-corner_radius_top_left = 10
-corner_radius_top_right = 10
-corner_radius_bottom_right = 10
-corner_radius_bottom_left = 10
-shadow_color = Color(0.0489907, 0.0304505, 0.0147735, 0.6)
-shadow_size = 5
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ygr3v"]
-content_margin_left = 20.0
-content_margin_top = 20.0
-content_margin_right = 20.0
-content_margin_bottom = 20.0
-bg_color = Color(0.361042, 0.0913546, 0.142382, 1)
-border_width_left = 3
-border_width_top = 3
-border_width_right = 3
-border_width_bottom = 3
-border_color = Color(0.992157, 0.878431, 0.831373, 0.654902)
-corner_radius_top_left = 10
-corner_radius_top_right = 10
-corner_radius_bottom_right = 10
-corner_radius_bottom_left = 10
-shadow_color = Color(0.0489907, 0.0304505, 0.0147735, 0.6)
-shadow_size = 5
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_cik10"]
-content_margin_left = 20.0
-content_margin_top = 20.0
-content_margin_right = 20.0
-content_margin_bottom = 20.0
-bg_color = Color(0.286063, 0.0647033, 0.106666, 1)
-border_width_left = 3
-border_width_top = 3
-border_width_right = 3
-border_width_bottom = 3
-border_color = Color(0.992157, 0.878431, 0.831373, 0.654902)
-corner_radius_top_left = 10
-corner_radius_top_right = 10
-corner_radius_bottom_right = 10
-corner_radius_bottom_left = 10
-shadow_color = Color(0.0489907, 0.0304505, 0.0147735, 0.6)
-shadow_size = 5
 
 [node name="MainMenu" type="Control"]
 layout_mode = 3
@@ -100,13 +46,8 @@ alignment = 1
 
 [node name="PlayButton" type="Button" parent="VBoxContainer"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.988035, 0.876242, 0.844665, 1)
-theme_override_colors/font_pressed_color = Color(1, 1, 1, 1)
-theme_override_colors/font_hover_color = Color(0.970923, 0.797098, 0.685072, 1)
 theme_override_font_sizes/font_size = 55
-theme_override_styles/normal = SubResource("StyleBoxFlat_efiv8")
-theme_override_styles/hover = SubResource("StyleBoxFlat_ygr3v")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_cik10")
+action_mode = 0
 text = "Play"
 
 [connection signal="button_up" from="VBoxContainer/PlayButton" to="." method="_on_play_button_up"]

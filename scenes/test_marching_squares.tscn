@@ -5,17 +5,16 @@
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_yf2uq"]
 
 [sub_resource type="NoiseTexture2D" id="NoiseTexture2D_dtf1j"]
-width = 1800
-height = 1200
+width = 256
+height = 256
 noise = SubResource("FastNoiseLite_yf2uq")
 
 [node name="TestMarchingSquares" type="Node2D"]
 script = ExtResource("1_p2fbi")
-backgound_color = Color(0.0705882, 0.188235, 0.290196, 1)
-point_color1 = Color(1, 1, 1, 1)
-point_color2 = Color(0, 0, 0, 1)
-line_color = Color(0.980392, 0.921569, 0.843137, 0.333333)
-marching_square_color = Color(0, 0.294485, 0.220352, 1)
-land_threshold = 0.43
-grid_size = 50
+backgound_color = Color(0.0561993, 0.160649, 0.251143, 1)
+point_color1 = Color(0.811765, 0.729412, 0.560784, 1)
+point_color2 = Color(0.109804, 0.0509804, 0.0352941, 1)
+line_color = Color(0.980392, 0.921569, 0.843137, 0.278431)
+marching_square_color = Color(0.0166773, 0.0733041, 0.127261, 1)
+grid_size = 1200
 noise = SubResource("NoiseTexture2D_dtf1j")
