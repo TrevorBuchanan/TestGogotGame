@@ -20,10 +20,11 @@ func _draw():
 	draw_rect(Rect2(0, 0, width, height), backgound_color)
 	# Draw reference lines
 	draw_lines()
-	# Draw marching squares
-	draw_marching_squares()
 	# Draw reference points
 	draw_points()
+	# Draw marching squares
+	draw_marching_squares()
+
 
 func draw_lines():
 	var i = 0
@@ -44,10 +45,10 @@ func draw_points():
 			j = 0
 			while j <= height:
 				var value = (noise.noise.get_noise_2d(i, j) + 1.0) / 2.0
-				if value < isolevel:
-					value = 0.0
-				else: 
+				if value > isolevel:
 					value = 1.0
+				else: 
+					value = 0.0
 				var lerp_color = point_color1.lerp(point_color2, value)
 				draw_circle(Vector2(i, j), 10, lerp_color)
 				j += grid_size
@@ -96,9 +97,9 @@ func draw_marching_squares():
 					square_index |= 0b0001
 				if (noise.noise.get_noise_2d(i + grid_size, j) + 1.0) / 2.0 > isolevel: 
 					square_index |= 0b0010
-				if (noise.noise.get_noise_2d(i, j + grid_size) + 1.0) / 2.0 > isolevel: 
-					square_index |= 0b0100
 				if (noise.noise.get_noise_2d(i + grid_size, j + grid_size) + 1.0) / 2.0 > isolevel: 
+					square_index |= 0b0100
+				if (noise.noise.get_noise_2d(i, j + grid_size) + 1.0) / 2.0 > isolevel: 
 					square_index |= 0b1000
 				var tris = triTable[square_index]
 				var k = 0
