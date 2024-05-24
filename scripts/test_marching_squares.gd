@@ -10,6 +10,7 @@ extends Node2D
 @export var width : int = 1800
 @export var height : int = 1200
 @export var noise : NoiseTexture2D
+@export var lerp : bool = true
 
 func _input(event):
 	if event.is_action_pressed("ui_cancel"):
@@ -20,11 +21,10 @@ func _draw():
 	draw_rect(Rect2(0, 0, width, height), backgound_color)
 	# Draw reference lines
 	draw_lines()
-	# Draw reference points
-	draw_points()
 	# Draw marching squares
 	draw_marching_squares()
-
+	# Draw reference points
+	draw_points()
 
 func draw_lines():
 	var i = 0
@@ -45,10 +45,10 @@ func draw_points():
 			j = 0
 			while j <= height:
 				var value = (noise.noise.get_noise_2d(i, j) + 1.0) / 2.0
-				if value > isolevel:
-					value = 1.0
-				else: 
-					value = 0.0
+				#if value > isolevel:
+					#value = 1.0
+				#else: 
+					#value = 0.0
 				var lerp_color = point_color1.lerp(point_color2, value)
 				draw_circle(Vector2(i, j), 10, lerp_color)
 				j += grid_size
@@ -57,8 +57,6 @@ func draw_points():
 		print("No noise resource found!")
 
 func draw_marching_squares():
-	# Edge table to aid in linear interpolation to create smoothing
-	#var edgeTable = [ 0x0, 0x9, 0xc, 0x5, 0x6, 0xf, 0xa, 0x3, 0x3, 0xa, 0xf, 0x6, 0x5, 0xc, 0x9, 0x0 ]
 	# Triangle table that holds all of the triangle connections
 	var triTable = [ [], 
 					 [0, 4, 7], 
@@ -77,35 +75,30 @@ func draw_marching_squares():
 					 [7, 2, 3, 7, 4, 2, 4, 1, 2],
 					 [0, 1, 3, 1, 2, 3]]
 	
-	var offsets = [ [0, 0], 
-					[grid_size, 0], 
-					[grid_size, grid_size], 
-					[0, grid_size],
-					[grid_size / 2, 0],
-					[grid_size, grid_size / 2],
-					[grid_size / 2, grid_size],
-					[0, grid_size / 2]]
-	
 	if noise and noise.noise:
+		var pt_vals = [0, 0, 0, 0]
 		var square_index = 0b0000
 		var i = 0
 		var j = 0
 		while j < height:
 			i = 0
 			while i < width:
-				var pt_1_val = (noise.noise.get_noise_2d(i, j) + 1.0) / 2.0
-				var pt_2_val = (noise.noise.get_noise_2d(i + grid_size, j) + 1.0) / 2.0
-				var pt_3_val = (noise.noise.get_noise_2d(i + grid_size, j + grid_size) + 1.0) / 2.0
-				var pt_4_val = (noise.noise.get_noise_2d(i, j + grid_size) + 1.0) / 2.0
+				pt_vals = [0, 0, 0, 0]
+				pt_vals[0] = (noise.noise.get_noise_2d(i, j) + 1.0) / 2.0
+				pt_vals[1] = (noise.noise.get_noise_2d(i + grid_size, j) + 1.0) / 2.0
+				pt_vals[2] = (noise.noise.get_noise_2d(i + grid_size, j + grid_size) + 1.0) / 2.0
+				pt_vals[3] = (noise.noise.get_noise_2d(i, j + grid_size) + 1.0) / 2.0
 				
-				if pt_1_val > isolevel: 
+				if pt_vals[0] > isolevel: 
 					square_index |= 0b0001
-				if pt_2_val > isolevel:
+				if pt_vals[1] > isolevel:
 					square_index |= 0b0010
-				if pt_3_val > isolevel: 
+				if pt_vals[2] > isolevel: 
 					square_index |= 0b0100
-				if pt_4_val > isolevel: 
+				if pt_vals[3] > isolevel: 
 					square_index |= 0b1000
+				
+				var offsets = get_offsets(pt_vals, square_index)
 				
 				var tris = triTable[square_index]
 				var k = 0
@@ -119,6 +112,46 @@ func draw_marching_squares():
 				square_index = 0b0000
 			j += grid_size
 
+func get_offsets(points_values, square_index):
+	# Edge table to aid in linear interpolation to create smoothing
+	var edgeTable = [ 0x0, 0x9, 0xc, 0x5, 0x6, 0xf, 0xa, 0x3, 
+					  0x3, 0xa, 0xf, 0x6, 0x5, 0xc, 0x9, 0x0 ]
+	# Offsets for points on each "marching" square
+	var offsets = [ [0, 0], 
+					[grid_size, 0], 
+					[grid_size, grid_size], 
+					[0, grid_size],
+					[grid_size / 2.0, 0],
+					[grid_size, grid_size / 2.0],
+					[grid_size / 2.0, grid_size],
+					[0, grid_size / 2.0]]
+	
+	var edges = edgeTable[square_index]
+	
+	if lerp:
+		if edges & 0b0001 > 0: 
+			offsets[4][0] += marching_squares_lerp(points_values[0], points_values[1])
+			pass
+		elif edges & 0b0010 > 0:
+			offsets[5][1] += marching_squares_lerp(points_values[1], points_values[2]) 
+			pass
+		elif edges & 0b0100 > 0: 
+			offsets[6][0] += marching_squares_lerp(points_values[3], points_values[2]) 
+			pass
+		elif edges & 0b1000 > 0: 
+			offsets[7][1] += marching_squares_lerp(points_values[0], points_values[3])
+			pass
+	return offsets
+
+func marching_squares_lerp(val1, val2):
+	if (abs(isolevel - val1) < 0.00001):
+		return 0.0
+	if (abs(isolevel - val2) < 0.00001):
+		return grid_size
+	if (abs(val1 - val2) < 0.00001):
+		return  0
+	var res = (isolevel - val1) / (val2 - val1) * grid_size
+	return (isolevel - val1) / (val2 - val1) * grid_size
 
 func back_to_menu():
 	# Load the new scene
