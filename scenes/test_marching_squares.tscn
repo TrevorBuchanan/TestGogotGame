@@ -1,4 +1,4 @@
-[gd_scene load_steps=4 format=3 uid="uid://c0anjecciyo2u"]
+[gd_scene load_steps=5 format=3 uid="uid://c0anjecciyo2u"]
 
 [ext_resource type="Script" path="res://scripts/test_marching_squares.gd" id="1_p2fbi"]
 
@@ -10,6 +10,8 @@ width = 128
 height = 128
 noise = SubResource("FastNoiseLite_yf2uq")
 
+[sub_resource type="SystemFont" id="SystemFont_lc6lm"]
+
 [node name="TestMarchingSquares" type="Node2D"]
 script = ExtResource("1_p2fbi")
 backgound_color = Color(0.0561993, 0.160649, 0.251143, 1)
@@ -17,7 +19,9 @@ point_color1 = Color(0.790067, 1.29974e-07, 0.384849, 1)
 point_color2 = Color(0, 0.400342, 0.889128, 1)
 line_color = Color(0.980392, 0.921569, 0.843137, 0.278431)
 marching_square_color = Color(0.0166773, 0.0733041, 0.127261, 1)
-ground_threshold = 0.53
-grid_size = 1200
+ground_threshold = 0.48
 noise = SubResource("NoiseTexture2D_dtf1j")
-lerp_scale = 2.74
+use_lerp = false
+show_grid = false
+show_points = false
+font = SubResource("SystemFont_lc6lm")

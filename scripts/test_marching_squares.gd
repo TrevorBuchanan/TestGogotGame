@@ -10,9 +10,11 @@ extends Node2D
 @export var width : int = 1800
 @export var height : int = 1200
 @export var noise : NoiseTexture2D
-@export var lerp : bool = true
-@export_range(0, 1, 0.01) var bias : float = 0.5
-@export var lerp_scale : float = 0
+@export var use_lerp : bool = true
+@export var show_grid : bool = true
+@export var my_lerp : bool = false
+@export var show_points = true
+@export var font : Font
 
 func _input(event):
 	if event.is_action_pressed("ui_cancel"):
@@ -22,11 +24,13 @@ func _draw():
 	# Draw background
 	draw_rect(Rect2(0, 0, width, height), backgound_color)
 	# Draw reference lines
-	draw_lines()
+	if show_grid:
+		draw_lines()
 	# Draw marching squares
 	draw_marching_squares()
 	# Draw reference points
-	draw_points()
+	if show_points:
+		draw_points()
 
 func draw_lines():
 	var i = 0
@@ -49,6 +53,7 @@ func draw_points():
 				var value = (noise.noise.get_noise_2d(i, j) + 1.0) / 2.0
 				var lerp_color = point_color1.lerp(point_color2, value)
 				draw_circle(Vector2(i, j), 10, lerp_color)
+				#draw_string(font, Vector2(i + 10, j + 20), "%f" %value)
 				j += grid_size
 			i += grid_size
 	else:
@@ -125,7 +130,7 @@ func get_offsets(points_values, square_index):
 	
 	var edges = edgeTable[square_index]
 	
-	if lerp:
+	if use_lerp:
 		if edges & 0b1000 > 0: 
 			offsets[4][0] = marching_squares_lerp(points_values[0], points_values[1])
 		if edges & 0b0100 > 0:
@@ -137,11 +142,14 @@ func get_offsets(points_values, square_index):
 	return offsets
 
 func marching_squares_lerp(val1, val2):
-	var shift = bias + ((val1 * 0.5) - (val2 * 0.5)) * lerp_scale
-	return lerp(0, grid_size, shift)
-	#var mu = (ground_threshold - val1) / (val2 - val1)
-	#return mu
-
+	var amt
+	if val2 == val1:
+		amt = 0.0
+	else:
+		amt = (ground_threshold - val1) / (val2 - val1)
+		if amt < 0 or amt > 1:
+			pass
+	return lerp(0, grid_size, amt)
 
 func back_to_menu():
 	# Load the new scene
