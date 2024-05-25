@@ -5,12 +5,14 @@ extends Node2D
 @export var point_color2 : Color = Color.RED
 @export var line_color : Color = Color.ANTIQUE_WHITE
 @export var marching_square_color : Color = Color.AQUAMARINE
-@export_range(0, 1, 0.01) var isolevel : float = 0.5
+@export_range(0, 1, 0.01) var ground_threshold : float = 0.5
 @export var grid_size : int = 50
 @export var width : int = 1800
 @export var height : int = 1200
 @export var noise : NoiseTexture2D
 @export var lerp : bool = true
+@export_range(0, 1, 0.01) var bias : float = 0.5
+@export var lerp_scale : float = 0
 
 func _input(event):
 	if event.is_action_pressed("ui_cancel"):
@@ -45,10 +47,6 @@ func draw_points():
 			j = 0
 			while j <= height:
 				var value = (noise.noise.get_noise_2d(i, j) + 1.0) / 2.0
-				#if value > isolevel:
-					#value = 1.0
-				#else: 
-					#value = 0.0
 				var lerp_color = point_color1.lerp(point_color2, value)
 				draw_circle(Vector2(i, j), 10, lerp_color)
 				j += grid_size
@@ -75,42 +73,41 @@ func draw_marching_squares():
 					 [7, 2, 3, 7, 4, 2, 4, 1, 2],
 					 [0, 1, 3, 1, 2, 3]]
 	
-	if noise and noise.noise:
-		var pt_vals = [0, 0, 0, 0]
-		var square_index = 0b0000
-		var i = 0
-		var j = 0
-		while j < height:
-			i = 0
-			while i < width:
-				pt_vals = [0, 0, 0, 0]
-				pt_vals[0] = (noise.noise.get_noise_2d(i, j) + 1.0) / 2.0
-				pt_vals[1] = (noise.noise.get_noise_2d(i + grid_size, j) + 1.0) / 2.0
-				pt_vals[2] = (noise.noise.get_noise_2d(i + grid_size, j + grid_size) + 1.0) / 2.0
-				pt_vals[3] = (noise.noise.get_noise_2d(i, j + grid_size) + 1.0) / 2.0
-				
-				if pt_vals[0] > isolevel: 
-					square_index |= 0b0001
-				if pt_vals[1] > isolevel:
-					square_index |= 0b0010
-				if pt_vals[2] > isolevel: 
-					square_index |= 0b0100
-				if pt_vals[3] > isolevel: 
-					square_index |= 0b1000
-				
-				var offsets = get_offsets(pt_vals, square_index)
-				
-				var tris = triTable[square_index]
-				var k = 0
-				while k < len(tris): # Draw a triangle
-					var points = PackedVector2Array([Vector2(i + offsets[tris[k]][0], j + offsets[tris[k]][1]), 
-										Vector2(i + offsets[tris[k + 1]][0], j + offsets[tris[k + 1]][1]), 
-										Vector2(i + offsets[tris[k + 2]][0], j + offsets[tris[k + 2]][1])])
-					draw_polygon(points, [marching_square_color])  
-					k += 3
-				i += grid_size
-				square_index = 0b0000
-			j += grid_size
+	var pt_vals = [0, 0, 0, 0]
+	var square_index = 0b0000
+	var i = 0
+	var j = 0
+	while j < height:
+		i = 0
+		while i < width:
+			pt_vals = [0, 0, 0, 0]
+			square_index = 0b0000
+			pt_vals[0] = (noise.noise.get_noise_2d(i, j) + 1.0) / 2.0
+			pt_vals[1] = (noise.noise.get_noise_2d(i + grid_size, j) + 1.0) / 2.0
+			pt_vals[2] = (noise.noise.get_noise_2d(i + grid_size, j + grid_size) + 1.0) / 2.0
+			pt_vals[3] = (noise.noise.get_noise_2d(i, j + grid_size) + 1.0) / 2.0
+			
+			if pt_vals[0] > ground_threshold: 
+				square_index |= 0b0001
+			if pt_vals[1] > ground_threshold:
+				square_index |= 0b0010
+			if pt_vals[2] > ground_threshold: 
+				square_index |= 0b0100
+			if pt_vals[3] > ground_threshold: 
+				square_index |= 0b1000
+			
+			var offsets = get_offsets(pt_vals, square_index)
+			
+			var tris = triTable[square_index]
+			var k = 0
+			while k < len(tris): # Draw a triangle
+				var points = PackedVector2Array([Vector2(i + offsets[tris[k]][0], j + offsets[tris[k]][1]), 
+									Vector2(i + offsets[tris[k + 1]][0], j + offsets[tris[k + 1]][1]), 
+									Vector2(i + offsets[tris[k + 2]][0], j + offsets[tris[k + 2]][1])])
+				draw_polygon(points, [marching_square_color])  
+				k += 3
+			i += grid_size
+		j += grid_size
 
 func get_offsets(points_values, square_index):
 	# Edge table to aid in linear interpolation to create smoothing
@@ -129,29 +126,22 @@ func get_offsets(points_values, square_index):
 	var edges = edgeTable[square_index]
 	
 	if lerp:
+		if edges & 0b1000 > 0: 
+			offsets[4][0] = marching_squares_lerp(points_values[0], points_values[1])
+		if edges & 0b0100 > 0:
+			offsets[5][1] = marching_squares_lerp(points_values[1], points_values[2]) 
+		if edges & 0b0010 > 0: 
+			offsets[6][0] = marching_squares_lerp(points_values[3], points_values[2]) 
 		if edges & 0b0001 > 0: 
-			offsets[4][0] += marching_squares_lerp(points_values[0], points_values[1])
-			pass
-		elif edges & 0b0010 > 0:
-			offsets[5][1] += marching_squares_lerp(points_values[1], points_values[2]) 
-			pass
-		elif edges & 0b0100 > 0: 
-			offsets[6][0] += marching_squares_lerp(points_values[3], points_values[2]) 
-			pass
-		elif edges & 0b1000 > 0: 
-			offsets[7][1] += marching_squares_lerp(points_values[0], points_values[3])
-			pass
+			offsets[7][1] = marching_squares_lerp(points_values[0], points_values[3])
 	return offsets
 
 func marching_squares_lerp(val1, val2):
-	if (abs(isolevel - val1) < 0.00001):
-		return 0.0
-	if (abs(isolevel - val2) < 0.00001):
-		return grid_size
-	if (abs(val1 - val2) < 0.00001):
-		return  0
-	var res = (isolevel - val1) / (val2 - val1) * grid_size
-	return (isolevel - val1) / (val2 - val1) * grid_size
+	var shift = bias + ((val1 * 0.5) - (val2 * 0.5)) * lerp_scale
+	return lerp(0, grid_size, shift)
+	#var mu = (ground_threshold - val1) / (val2 - val1)
+	#return mu
+
 
 func back_to_menu():
 	# Load the new scene
