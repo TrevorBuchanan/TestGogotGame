@@ -7,13 +7,17 @@ func _ready():
 
 func _on_play_button_up():
 	# Load the new scene
-	var new_scene = load("res://scenes/test_marching_squares.tscn")
-	
+	var new_scene = load("res://scenes/temp.tscn")
+	if not new_scene:
+		print("Scene does not exist at given path")
+		return
+		
 	# Get the root node (usually it's the first node in the current scene tree)
 	var root = get_tree().root
 	
 	# Create an instance of the new scene
 	var new_scene_instance = new_scene.instantiate()
+
 	
 	# Add the new scene to the root node
 	root.add_child(new_scene_instance)
